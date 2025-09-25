@@ -51,14 +51,14 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section - kecil, rapat */}
-      <section className="bg-blue-50 py-8">   {/* sebelumnya py-16 */}
-  <div className="container mx-auto px-6 text-center">
-    <h1 className="text-4xl md:text-5xl font-bold text-blue-700">
-      Welcome to <span className="text-blue-500">MyLibrary</span>
-    </h1>
-    </div>
-</section>
+      {/* Hero Section - jarak dipersempit */}
+      <section className="bg-blue-50 py-6">   {/* sebelumnya py-16 → py-6 */}
+        <div className="container mx-auto px-6 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-blue-700">
+            Welcome to <span className="text-blue-500">MyLibrary</span>
+          </h1>
+        </div>
+      </section>
 
       {/* Recommended Books - 2 baris */}
       <section className="container mx-auto px-4 py-2">
