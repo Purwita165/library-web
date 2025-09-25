@@ -1,10 +1,10 @@
+// src/lib/api.ts
 import axios from "axios"
 
-export const api = axios.create({
-  baseURL: "https://belibraryformentee-production.up.railway.app", // 🔑 API mentor
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
 })
 
-// inject token kalau ada
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token")
   if (token) {
@@ -12,3 +12,5 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+export default api   // ✅ ini penting

@@ -1,20 +1,12 @@
-import { api } from "@/lib/api"
+// src/features/auth/api.ts
+import api from "@/lib/api"
 
-interface LoginPayload {
-  email: string
-  password: string
+export async function login(email: string, password: string) {
+  const res = await api.post("/auth/login", { email, password })
+  return res.data // biasanya { token, user }
 }
 
-interface LoginResponse {
-  access_token: string
-  user: {
-    id: string
-    email: string
-    role: string
-  }
-}
-
-export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const res = await api.post("/auth/login", payload)
+export async function register(email: string, password: string) {
+  const res = await api.post("/auth/register", { email, password })
   return res.data
 }

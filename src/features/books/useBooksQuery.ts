@@ -1,20 +1,21 @@
 // src/features/books/useBooksQuery.ts
-import { useQuery } from "@tanstack/react-query";
-import { Book } from "./types";
-import { fetchBooks, fetchBookById } from "./api";
+import { useQuery } from "@tanstack/react-query"
+import { fetchBooks, fetchBookDetail } from "./api"
+import { Book } from "./types"
 
+// ambil semua buku
 export function useBooksQuery() {
   return useQuery<Book[]>({
     queryKey: ["books"],
     queryFn: fetchBooks,
-    staleTime: 1000 * 60 * 2, // 2 minutes (optional)
-  });
+  })
 }
 
+// ambil detail buku by id
 export function useBookDetailQuery(id: string) {
   return useQuery<Book>({
-    queryKey: ["books", id],
-    queryFn: () => fetchBookById(id),
-    enabled: !!id,
+    queryKey: ["book", id],
+    queryFn: () => fetchBookDetail(id),
+    enabled: !!id, // hanya jalan kalau id ada
   })
 }
