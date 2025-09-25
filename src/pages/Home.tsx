@@ -52,22 +52,13 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section - kecil, rapat */}
-      <section className="bg-secondary py-4 text-center">
-        <div className="container mx-auto px-4 space-y-1">
-          <h1 className="text-xl md:text-2xl font-bold text-primary">
-            Welcome to MyLibrary
-          </h1>
-        </div>
-      </section>
-
-      {/* Categories - tipis & rapat */}
-      <section className="container mx-auto px-4 py-2">
-        <div className="grid gap-2 grid-cols-3 sm:grid-cols-6 md:grid-cols-6">
-          {categories.map((c) => (
-            <CategoryCard key={c.name} category={c.name} icon={c.icon} />
-          ))}
-        </div>
-      </section>
+      <section className="bg-blue-50 py-8">   {/* sebelumnya py-16 */}
+  <div className="container mx-auto px-6 text-center">
+    <h1 className="text-4xl md:text-5xl font-bold text-blue-700">
+      Welcome to <span className="text-blue-500">MyLibrary</span>
+    </h1>
+    </div>
+</section>
 
       {/* Recommended Books - 2 baris */}
       <section className="container mx-auto px-4 py-2">
