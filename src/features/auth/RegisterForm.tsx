@@ -1,79 +1,78 @@
-import { useState, FormEvent } from "react"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+// src/features/auth/components/RegisterForm.tsx
+import { useNavigate } from "react-router-dom"
+import { useRegister } from "@/features/auth/useRegister"
 import { toast } from "sonner"
 
 export function RegisterForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
+  const navigate = useNavigate()
+  const registerMutation = useRegister()
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const name = formData.get("name") as string
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
 
-    if (!email || !password || !confirmPassword) {
-      toast.error("⚠️ Please fill in all fields")
-      return
+    try {
+      await registerMutation.mutateAsync({ name, email, password })
+      toast.success("✅ Register successful. Please login.")
+
+      // ✅ Redirect ke halaman login
+      navigate("/login")
+    } catch (err: any) {
+      toast.error(err?.message ?? "Register failed")
     }
-
-    if (password !== confirmPassword) {
-      toast.error("⚠️ Passwords do not match")
-      return
-    }
-
-    // Simulasi register sukses
-    localStorage.setItem("user", JSON.stringify({ email, role: "user" }))
-    toast.success("🎉 Registration successful!")
-
-    // Nanti bisa diarahkan ke Home atau Login
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-sm mx-auto">
-      {/* Email */}
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium">
+          Name
+        </label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          className="w-full border rounded p-2 mt-1"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium">
+          Email
+        </label>
+        <input
           id="email"
+          name="email"
           type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           required
+          className="w-full border rounded p-2 mt-1"
         />
       </div>
 
-      {/* Password */}
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium">
+          Password
+        </label>
+        <input
           id="password"
+          name="password"
           type="password"
-          placeholder="Enter your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           required
+          className="w-full border rounded p-2 mt-1"
         />
       </div>
 
-      {/* Confirm Password */}
-      <div className="space-y-2">
-        <Label htmlFor="confirm-password">Confirm Password</Label>
-        <Input
-          id="confirm-password"
-          type="password"
-          placeholder="Confirm your password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-      </div>
-
-      {/* Submit */}
-      <Button type="submit" className="w-full">
-        Register
-      </Button>
+      <button
+        type="submit"
+        disabled={registerMutation.isPending}
+        className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+      >
+        {registerMutation.isPending ? "Processing..." : "Register"}
+      </button>
     </form>
   )
 }

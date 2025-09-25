@@ -1,32 +1,40 @@
+// src/components/Navbar.tsx
 import { Link, useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, Menu, X } from "lucide-react"
+
+interface User {
+  id: string
+  name: string
+  email: string
+}
 
 export default function Navbar() {
   const navigate = useNavigate()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [cartCount, setCartCount] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
-    // Ambil user dari localStorage
+    // cek user di localStorage
     const storedUser = localStorage.getItem("user")
     if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser))
-      } catch (e) {
-        console.error("❌ Gagal parse user dari localStorage", e)
-      }
+      setUser(JSON.parse(storedUser))
     }
 
-    // Ambil cart dari localStorage
+    // cek cart di localStorage
     const storedCart = localStorage.getItem("cart")
     if (storedCart) {
-      try {
-        setCartCount(JSON.parse(storedCart).length)
-      } catch (e) {
-        console.error("❌ Gagal parse cart dari localStorage", e)
-      }
+      setCartCount(JSON.parse(storedCart).length)
     }
+
+    // listener perubahan localStorage
+    const handleStorageChange = () => {
+      const updatedUser = localStorage.getItem("user")
+      setUser(updatedUser ? JSON.parse(updatedUser) : null)
+    }
+    window.addEventListener("storage", handleStorageChange)
+    return () => window.removeEventListener("storage", handleStorageChange)
   }, [])
 
   const handleLogout = () => {
@@ -34,10 +42,11 @@ export default function Navbar() {
     localStorage.removeItem("token")
     setUser(null)
     navigate("/login")
+    setMenuOpen(false)
   }
 
   return (
-    <nav className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md fixed top-0 left-0 w-full z-50">
+    <nav className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-50">
       {/* Logo */}
       <Link
         to="/"
@@ -46,39 +55,48 @@ export default function Navbar() {
         MyLibrary
       </Link>
 
+      {/* Hamburger (mobile only) */}
+      <button
+        className="md:hidden focus:outline-none"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        {menuOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
       {/* Menu */}
-      <div className="space-x-6 flex items-center">
-        <Link to="/" className="hover:text-gray-200">
+      <div
+        className={`${
+          menuOpen
+            ? "flex flex-col absolute top-16 left-0 w-full bg-blue-600 shadow-md p-4 space-y-3"
+            : "hidden"
+        } md:flex md:items-center md:space-x-6 md:static md:w-auto md:p-0 md:space-y-0`}
+      >
+        <Link to="/" className="hover:text-gray-200" onClick={() => setMenuOpen(false)}>
           Home
         </Link>
-        <Link to="/books" className="hover:text-gray-200">
+        <Link to="/books" className="hover:text-gray-200" onClick={() => setMenuOpen(false)}>
           Books
         </Link>
-        <Link to="/search" className="hover:text-gray-200">
+        <Link to="/search" className="hover:text-gray-200" onClick={() => setMenuOpen(false)}>
           Search
         </Link>
 
         {!user ? (
           <>
-            <Link to="/login" className="hover:text-gray-200">
+            <Link to="/login" className="hover:text-gray-200" onClick={() => setMenuOpen(false)}>
               Login
             </Link>
-            <Link to="/register" className="hover:text-gray-200">
+            <Link to="/register" className="hover:text-gray-200" onClick={() => setMenuOpen(false)}>
               Register
             </Link>
-            {/* Debug kalau belum login */}
-            <span className="text-xs italic text-red-300">Belum login</span>
           </>
         ) : (
           <>
-            {/* Debug: tampilkan user info */}
-            <span className="text-xs italic">
-              {user.email} ({user.role})
-            </span>
-            <Link to="/profile" className="hover:text-gray-200">
+            <span className="italic text-sm">👋 Hi, {user.name || user.email}</span>
+            <Link to="/profile" className="hover:text-gray-200" onClick={() => setMenuOpen(false)}>
               Profile
             </Link>
-            <Link to="/my-loans" className="hover:text-gray-200">
+            <Link to="/my-loans" className="hover:text-gray-200" onClick={() => setMenuOpen(false)}>
               My Loans
             </Link>
             <button
@@ -94,6 +112,7 @@ export default function Navbar() {
         <Link
           to="/cart"
           className="relative flex items-center hover:text-gray-200"
+          onClick={() => setMenuOpen(false)}
         >
           <ShoppingCart className="w-5 h-5" />
           {cartCount > 0 && (

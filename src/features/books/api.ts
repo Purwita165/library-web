@@ -1,23 +1,18 @@
-// src/features/books/api.ts
 import api from "@/lib/api"
 import { Book } from "./types"
 
+// Ambil semua buku dari backend
 export async function fetchBooks(): Promise<Book[]> {
   const res = await api.get("/books")
+  // backend return bisa { success: false } → kita handle
+  if (!res.data || !Array.isArray(res.data)) {
+    throw new Error(res.data?.message ?? "Failed to fetch books")
+  }
   return res.data
 }
 
-export async function fetchBookDetail(id: string): Promise<Book> {
+// Ambil detail buku
+export async function fetchBookById(id: string): Promise<Book> {
   const res = await api.get(`/books/${id}`)
-  return res.data
-}
-
-export async function borrowBook(id: string) {
-  const res = await api.post(`/books/${id}/borrow`)
-  return res.data
-}
-
-export async function returnBook(id: string) {
-  const res = await api.post(`/books/${id}/return`)
   return res.data
 }

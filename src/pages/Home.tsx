@@ -2,8 +2,8 @@
 import { CategoryCard } from "@/features/books/components/CategoryCard"
 import { BookCard } from "@/features/books/components/BookCard"
 import { AuthorCard } from "@/features/authors/components/AuthorCard"
-import { useBooksQuery } from "@/features/books/useBooksQuery"
 import { Book } from "@/features/books/types"
+import { useBooksQuery } from "@/features/books/useBooksQuery"
 
 // ✅ Mock categories
 const categories = [
@@ -13,6 +13,20 @@ const categories = [
   { name: "Science", icon: "🔬" },
   { name: "Fiction", icon: "📖" },
   { name: "History", icon: "🏛️" },
+]
+
+// ✅ Mock fallback books (10)
+const mockBooks: Book[] = [
+  { id: "1", title: "Clean Code", author: "Robert C. Martin", category: "Programming", coverUrl: "/covers/book-1.png", available: true },
+  { id: "2", title: "The Pragmatic Programmer", author: "Andrew Hunt", category: "Programming", coverUrl: "/covers/book-2.png", available: true },
+  { id: "3", title: "Refactoring", author: "Martin Fowler", category: "Programming", coverUrl: "/covers/book-3.png", available: false },
+  { id: "4", title: "Design Patterns", author: "Erich Gamma", category: "Programming", coverUrl: "/covers/book-4.png", available: true },
+  { id: "5", title: "Business Model Generation", author: "Alexander Osterwalder", category: "Business", coverUrl: "/covers/book-5.png", available: true },
+  { id: "6", title: "Atomic Habits", author: "James Clear", category: "Science", coverUrl: "/covers/book-6.png", available: true },
+  { id: "7", title: "Sapiens", author: "Yuval Noah Harari", category: "History", coverUrl: "/covers/book-7.png", available: true },
+  { id: "8", title: "The Lean Startup", author: "Eric Ries", category: "Business", coverUrl: "/covers/book-8.png", available: false },
+  { id: "9", title: "Thinking, Fast and Slow", author: "Daniel Kahneman", category: "Science", coverUrl: "/covers/book-9.png", available: true },
+  { id: "10", title: "To Kill a Mockingbird", author: "Harper Lee", category: "Fiction", coverUrl: "/covers/book-10.png", available: true },
 ]
 
 // ✅ Mock authors (10, kecil)
@@ -30,11 +44,14 @@ const authors = [
 ]
 
 export default function Home() {
-  const { data: books, isLoading, isError } = useBooksQuery()
+  const { data: books, isError } = useBooksQuery()
+
+  // fallback ke mockBooks kalau API error / kosong
+  const displayBooks = !isError && books && books.length > 0 ? books : mockBooks
 
   return (
     <div className="flex flex-col">
-      {/* Hero Section - diperkecil */}
+      {/* Hero Section - kecil, rapat */}
       <section className="bg-secondary py-4 text-center">
         <div className="container mx-auto px-4 space-y-1">
           <h1 className="text-xl md:text-2xl font-bold text-primary">
@@ -43,7 +60,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories */}
+      {/* Categories - tipis & rapat */}
       <section className="container mx-auto px-4 py-2">
         <div className="grid gap-2 grid-cols-3 sm:grid-cols-6 md:grid-cols-6">
           {categories.map((c) => (
@@ -52,25 +69,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Recommended Books */}
+      {/* Recommended Books - 2 baris */}
       <section className="container mx-auto px-4 py-2">
-        {isLoading && <p className="text-center text-gray-500">Loading books...</p>}
-        {isError && <p className="text-center text-red-500">Gagal memuat buku</p>}
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          {books?.slice(0, 10).map((book: Book) => (
+          {displayBooks.slice(0, 10).map((book: Book) => (
             <BookCard key={book.id} book={book} />
           ))}
         </div>
       </section>
 
-      {/* Popular Authors */}
+      {/* Popular Authors - kecil & rapat */}
       <section className="container mx-auto px-4 py-2">
         <h2 className="text-xs font-medium mb-2 text-center text-gray-700">
           Popular Authors
         </h2>
         <div className="grid gap-2 grid-cols-5 sm:grid-cols-5 md:grid-cols-5">
           {authors.map((author) => (
-            <AuthorCard key={author.name} name={author.name} photo={author.photo} />
+            <AuthorCard
+              key={author.name}
+              name={author.name}
+              photo={author.photo}
+            />
           ))}
         </div>
       </section>
