@@ -6,7 +6,7 @@ import LoginPage from "@/pages/Login"
 import RegisterPage from "@/pages/Register"
 import SearchPage from "@/pages/SearchPage"
 import ProfilePage from "@/pages/Profile"
-import MyLoansPage from "@/pages/MyLoans"
+import MyLoansPage from "@/features/loans/MyLoans"
 import BookListPage from "@/pages/BookListPage"
 import CartPage from "@/pages/Cart"
 
