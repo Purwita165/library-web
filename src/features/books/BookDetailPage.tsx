@@ -1,91 +1,67 @@
-// src/features/books/BookDetailPage.tsx
-import { useParams } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { toast } from "sonner"
-import { useState } from "react"
-import { useBorrowBook } from "@/features/books/useBorrowBook"
-import { useBookDetailQuery } from "@/features/books/useBookDetailQuery"
-import { Book } from "@/features/books/types"
-
-// fallback mockBooks (bisa pakai subset dari Home.tsx)
-const mockBooks: Book[] = [
-  { id: "1", title: "Clean Code", author: "Robert C. Martin", category: "Programming", coverUrl: "/covers/book-1.png", available: true },
-  { id: "2", title: "The Pragmatic Programmer", author: "Andrew Hunt", category: "Programming", coverUrl: "/covers/book-2.png", available: true },
-  { id: "3", title: "Refactoring", author: "Martin Fowler", category: "Programming", coverUrl: "/covers/book-3.png", available: false },
-]
+import { useParams } from "react-router-dom";
+import { useBookDetailQuery } from "@/features/books/useBookDetailQuery";
+import { useBorrowBook } from "@/features/borrows/useBorrowBook";
+import { toast } from "sonner";
 
 export default function BookDetailPage() {
-  const { id } = useParams<{ id: string }>()
-  const { data: book, isError, isPending } = useBookDetailQuery(id || "")
-  const borrowMutation = useBorrowBook()
+  const { id } = useParams<{ id: string }>();
+  const { data: book, isLoading, isError, error } = useBookDetailQuery(id ?? "");
+  const borrowMutation = useBorrowBook();
 
-  // fallback → cari dari mockBooks kalau gagal
-  const displayBook = !isError && book ? book : mockBooks.find((b) => b.id === id)
-
-  const [localProcessing, setLocalProcessing] = useState(false)
-
-  if (isPending) return <p className="p-6 text-center">Loading book...</p>
-  if (!displayBook) return <p className="p-6 text-center">Book not found.</p>
+  if (isLoading) return <p className="text-center text-gray-500">Loading book...</p>;
+  if (isError) return <p className="text-center text-red-500">Error: {error.message}</p>;
+  if (!book) return <p className="text-center text-gray-500">Book not found</p>;
 
   const handleBorrow = async () => {
-    if (!displayBook.available) return
     try {
-      setLocalProcessing(true)
-      await borrowMutation.mutateAsync(displayBook.id)
-      toast.success(`📚 You borrowed "${displayBook.title}"`)
+      if (!book.id) return;
+      await borrowMutation.mutateAsync(book.id);
+      toast.success("📚 Book borrowed successfully!");
     } catch (err: any) {
-      toast.error(err?.message ?? "Failed to borrow book")
-    } finally {
-      setLocalProcessing(false)
+      toast.error(err?.message ?? "Borrow failed");
     }
-  }
-
-  const isMutating = borrowMutation.isPending || localProcessing
+  };
 
   return (
-    <div className="container mx-auto px-6 py-8">
-      <div className="grid md:grid-cols-2 gap-8">
-        <img
-          src={displayBook.coverUrl}
-          alt={displayBook.title}
-          className="w-full h-[400px] object-cover rounded-md shadow"
-        />
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="relative">
+          <img
+            src={book.coverUrl || "/covers/placeholder.png"}
+            alt={book.title}
+            className="w-48 h-64 object-cover rounded shadow"
+          />
+          <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+            {book.category}
+          </span>
+          <span
+            className={`absolute top-2 right-2 text-xs px-2 py-1 rounded ${
+              book.available ? "bg-green-600" : "bg-red-600"
+            } text-white`}
+          >
+            {book.available ? "Available" : "Borrowed"}
+          </span>
+        </div>
 
-        <div className="space-y-4">
-          <h1 className="text-3xl font-bold">{displayBook.title}</h1>
-          <p className="text-gray-600">Author: {displayBook.author}</p>
-          <p className="text-gray-600">Category: {displayBook.category}</p>
-          <div>
-            <Badge
-              className={
-                displayBook.available ? "bg-green-600 text-white" : "bg-red-600 text-white"
-              }
-            >
-              {displayBook.available ? "Available" : "Not Available"}
-            </Badge>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold mb-2">{book.title}</h1>
+          <p className="text-sm text-gray-600 mb-1">Author: {book.author}</p>
+          <p className="text-sm text-gray-500 mb-3">Category: {book.category}</p>
+          {book.description && (
+            <p className="text-sm text-gray-700 mb-3">{book.description}</p>
+          )}
 
-          <div className="pt-4">
-            <Button
+          {book.available && (
+            <button
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
               onClick={handleBorrow}
-              disabled={!displayBook.available || isMutating}
-              className="w-full md:w-auto"
+              disabled={borrowMutation.isPending}
             >
-              {isMutating
-                ? "Processing..."
-                : displayBook.available
-                ? "Borrow Book"
-                : "Not Available"}
-            </Button>
-          </div>
+              {borrowMutation.isPending ? "Processing..." : "Borrow this book"}
+            </button>
+          )}
         </div>
       </div>
-
-      <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
-        <p className="text-gray-500 italic">No reviews yet.</p>
-      </div>
     </div>
-  )
+  );
 }
