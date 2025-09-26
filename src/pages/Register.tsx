@@ -11,16 +11,17 @@ export default function RegisterPage() {
   const registerMutation = useRegister()
   const navigate = useNavigate()
 
+  const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      const res = await registerMutation.mutateAsync({ email, password })
+      const res = await registerMutation.mutateAsync({ name, email, password })
       toast.success("Register successful 🎉")
       console.log("Registered:", res)
-      navigate("/login") // redirect ke login
+      navigate("/login")
     } catch (err: any) {
       toast.error(err?.message ?? "Register failed")
     }
@@ -31,6 +32,18 @@ export default function RegisterPage() {
       <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            type="text"
+            placeholder="Your full name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+
         <div>
           <Label htmlFor="email">Email</Label>
           <Input
