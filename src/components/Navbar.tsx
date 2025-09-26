@@ -30,7 +30,7 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-blue-600 text-white shadow-md">
-      <div className="container mx-auto flex justify-between items-center px-6 py-4">
+      <div className="container mx-auto flex justify-between items-center px-6 py-3">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold tracking-wide">
           MyLibrary

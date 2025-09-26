@@ -37,14 +37,14 @@ export interface RegisterResponse {
 
 export async function registerRequest(email: string, password: string): Promise<RegisterResponse> {
   const base = import.meta.env.VITE_API_URL ?? "";
-  const res = await fetch(`${base}/api/auth/register`, {
+  const res = await fetch(`${base}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
 
   if (!res.ok) {
-    let msg = `Register failed: ${res.status}`;
+    let msg = `Login Failed: ${res.status}`;
     try {
       const body = await res.json();
       if (body?.message) msg = body.message;
