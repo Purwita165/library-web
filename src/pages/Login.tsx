@@ -16,11 +16,9 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     try {
       const res = await loginMutation.mutateAsync({ email, password })
 
-      // ✅ Simpan token & user ke localStorage
       if (res?.token) {
         localStorage.setItem("token", res.token)
       }
@@ -29,7 +27,7 @@ export default function LoginPage() {
       }
 
       toast.success("Login successful 🎉")
-      navigate("/") // ✅ redirect ke Home
+      navigate("/") // redirect ke Home
     } catch (err: any) {
       toast.error(err?.message ?? "Login failed")
     }
@@ -45,7 +43,7 @@ export default function LoginPage() {
           <Input
             id="email"
             type="email"
-            placeholder="your@email.com"
+            placeholder="admin@library.local"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
