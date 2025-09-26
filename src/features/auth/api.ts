@@ -1,6 +1,6 @@
 // src/features/auth/api.ts
 
-// ---- Login ----
+// -------------------- LOGIN --------------------
 export interface LoginResponse {
   token: string;
   user: {
@@ -11,12 +11,17 @@ export interface LoginResponse {
   };
 }
 
-export async function loginRequest(email: string, password: string): Promise<LoginResponse> {
+export async function loginRequest(
+  email: string,
+  password: string
+): Promise<LoginResponse> {
   const base = import.meta.env.VITE_API_URL ?? "";
-  const res = await fetch(`${base}/api/auth/login`, {
+  const url = `${base}/api/auth/login`;
+
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password }), // ✅ hanya email & password
   });
 
   if (!res.ok) {
@@ -31,7 +36,7 @@ export async function loginRequest(email: string, password: string): Promise<Log
   return res.json();
 }
 
-// ---- Register ----
+// -------------------- REGISTER --------------------
 export interface RegisterResponse {
   id: string;
   name: string;
@@ -39,12 +44,18 @@ export interface RegisterResponse {
   role?: string;
 }
 
-export async function registerRequest(name: string, email: string, password: string): Promise<RegisterResponse> {
+export async function registerRequest(
+  name: string,
+  email: string,
+  password: string
+): Promise<RegisterResponse> {
   const base = import.meta.env.VITE_API_URL ?? "";
-  const res = await fetch(`${base}/api/auth/register`, {
+  const url = `${base}/api/auth/register`;
+
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, email, password }), // ✅ name, email, password
   });
 
   if (!res.ok) {
