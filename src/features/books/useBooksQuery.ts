@@ -9,7 +9,7 @@ async function fetchBooks(): Promise<Book[]> {
   const res = await fetch(`${base}/api/books`, {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token ?? ""}`, // ✅ pakai token
+      Authorization: `Bearer ${token ?? ""}`,
     },
   })
 
@@ -22,7 +22,23 @@ async function fetchBooks(): Promise<Book[]> {
     throw new Error(msg)
   }
 
-  return res.json()
+  const body = await res.json()
+  console.log("📚 API books response:", body)
+
+  // Ambil array dari body.data.books
+  if (Array.isArray(body?.data?.books)) {
+    return body.data.books.map((b: any) => ({
+      id: b.id,
+      title: b.title,
+      author: b.author?.name ?? "Unknown Author",
+      category: b.category?.name ?? "Uncategorized",
+      coverUrl: b.coverImage ?? "/covers/placeholder.png",
+      available: (b.availableCopies ?? 0) > 0,
+      description: b.description,
+    }))
+  }
+
+  return []
 }
 
 export function useBooksQuery() {

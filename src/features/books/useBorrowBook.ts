@@ -1,56 +1,47 @@
-// src/features/books/useBorrowBook.ts
+// src/features/borrows/useBorrowBook.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import  api  from "@/lib/api"
-import { Book } from "./types"
+
+interface BorrowResponse {
+  id: number
+  bookId: number
+  status: string
+  dueDate?: string
+}
+
+async function borrowBook(bookId: number): Promise<BorrowResponse> {
+  const base = import.meta.env.VITE_API_URL ?? ""
+  const token = localStorage.getItem("token")
+
+  const res = await fetch(`${base}/api/borrows`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token ?? ""}`,
+    },
+    body: JSON.stringify({ bookId }),
+  })
+
+  if (!res.ok) {
+    let msg = `Borrow failed: ${res.status}`
+    try {
+      const body = await res.json()
+      if (body?.message) msg = body.message
+    } catch {}
+    throw new Error(msg)
+  }
+
+  return res.json()
+}
 
 export function useBorrowBook() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (bookId: string) => {
-      // 🔥 hit API real
-      const res = await api.post(`/books/${bookId}/borrow`)
-      return res.data
-    },
-    onMutate: async (bookId: string) => {
-      // ✅ Optimistic update
-      await queryClient.cancelQueries({ queryKey: ["books"] })
-      await queryClient.cancelQueries({ queryKey: ["book", bookId] })
-
-      const prevBooks = queryClient.getQueryData<Book[]>(["books"])
-      const prevBook = queryClient.getQueryData<Book>(["book", bookId])
-
-      if (prevBooks) {
-        queryClient.setQueryData<Book[]>(
-          ["books"],
-          prevBooks.map((b) =>
-            b.id === bookId ? { ...b, available: false } : b
-          )
-        )
-      }
-
-      if (prevBook) {
-        queryClient.setQueryData<Book>(["book", bookId], {
-          ...prevBook,
-          available: false,
-        })
-      }
-
-      return { prevBooks, prevBook }
-    },
-    onError: (_err, bookId, context) => {
-      // ❌ rollback kalau gagal
-      if (context?.prevBooks) {
-        queryClient.setQueryData(["books"], context.prevBooks)
-      }
-      if (context?.prevBook) {
-        queryClient.setQueryData(["book", bookId], context.prevBook)
-      }
-    },
-    onSettled: (_data, _err, bookId) => {
-      // 🔄 refetch
+    mutationFn: borrowBook,
+    onSuccess: () => {
+      // refresh daftar buku & loans setelah borrow berhasil
       queryClient.invalidateQueries({ queryKey: ["books"] })
-      queryClient.invalidateQueries({ queryKey: ["book", bookId] })
+      queryClient.invalidateQueries({ queryKey: ["loans"] })
     },
   })
 }

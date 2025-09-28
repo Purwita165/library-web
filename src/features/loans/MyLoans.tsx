@@ -1,23 +1,30 @@
 // src/features/loans/MyLoans.tsx
-import { useLoansQuery } from "./useLoansQuery"
+import useLoansQuery from "./useLoansQuery"
+import { useReturnBook } from "@/features/borrows/useReturnBooks"
 
 export default function MyLoans() {
-  const { data: loans, isLoading, isError, error } = useLoansQuery()
+  const { loans, isLoading, error, refetch } = useLoansQuery()
+  const returnMutation = useReturnBook()
+
+  const handleReturn = async (loanId: number) => {
+    try {
+      await returnMutation.mutateAsync(loanId)
+      refetch() // refresh daftar loans setelah return sukses
+    } catch (err) {
+      console.error("❌ Error returning book:", err)
+    }
+  }
 
   if (isLoading) {
     return <p className="text-center text-gray-500">Loading your loans...</p>
   }
 
-  if (isError) {
-    return (
-      <p className="text-center text-red-500">
-        ❌ Error loading loans: {error.message}
-      </p>
-    )
+  if (error) {
+    return <p className="text-center text-red-500">❌ {error}</p>
   }
 
   if (!loans || loans.length === 0) {
-    return <p className="text-center text-gray-500">You have no active loans.</p>
+    return <p className="text-center text-gray-500">You don’t have any active loans</p>
   }
 
   return (
@@ -27,28 +34,54 @@ export default function MyLoans() {
         {loans.map((loan) => (
           <div
             key={loan.id}
-            className="border rounded-lg p-4 shadow-sm hover:shadow-md transition"
+            className="border rounded-lg shadow-sm p-4 flex flex-col bg-white"
           >
-            <img
-              src={loan.book.coverUrl || "/covers/placeholder.png"}
-              alt={loan.book.title}
-              className="w-full h-40 object-cover rounded mb-2"
-            />
-            <h3 className="text-sm font-semibold">{loan.book.title}</h3>
-            <p className="text-xs text-gray-600">{loan.book.author}</p>
-            <p
-              className={`text-xs font-medium mt-1 ${
-                loan.status === "BORROWED"
-                  ? "text-yellow-600"
-                  : loan.status === "RETURNED"
-                  ? "text-green-600"
-                  : "text-gray-500"
+            {/* Cover */}
+            {loan.book?.coverImage && (
+              <img
+                src={loan.book.coverImage}
+                alt={loan.book.title}
+                className="w-full h-40 object-cover rounded mb-3"
+              />
+            )}
+
+            {/* Book info */}
+            <h2 className="text-sm font-semibold">
+              {loan.book?.title ?? "Unknown Book"}
+            </h2>
+            <p className="text-xs text-gray-600">
+              {loan.book?.author?.name ?? "Unknown Author"}
+            </p>
+
+            {/* Loan info */}
+            <p className="text-xs text-gray-500 mt-2">
+              Borrowed:{" "}
+              {loan.borrowedAt
+                ? new Date(loan.borrowedAt).toLocaleDateString()
+                : "-"}
+            </p>
+            <p className="text-xs text-gray-500">
+              Due:{" "}
+              {loan.dueAt ? new Date(loan.dueAt).toLocaleDateString() : "-"}
+            </p>
+
+            <span
+              className={`mt-2 text-xs font-semibold ${
+                loan.status === "active" ? "text-green-600" : "text-red-600"
               }`}
             >
               {loan.status}
-            </p>
-            {loan.dueDate && (
-              <p className="text-xs text-gray-500">Due: {loan.dueDate}</p>
+            </span>
+
+            {/* Button Return kalau masih active */}
+            {loan.status === "active" && (
+              <button
+                onClick={() => handleReturn(loan.id)}
+                disabled={returnMutation.isPending}
+                className="mt-3 bg-red-600 text-white text-xs py-1 px-2 rounded hover:bg-red-700 disabled:opacity-50"
+              >
+                {returnMutation.isPending ? "Returning..." : "Return"}
+              </button>
             )}
           </div>
         ))}
