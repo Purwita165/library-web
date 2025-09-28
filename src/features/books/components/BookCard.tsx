@@ -15,14 +15,18 @@ export function BookCard({ book }: Props) {
         {/* Cover */}
         <div className="relative">
           <img
-            src={book.coverUrl}
+            src={book.coverUrl || "/covers/placeholder.png"} // ✅ fallback
             alt={book.title}
-            className="w-full h-40 object-cover" // ✅ lebih kecil biar muat 5 kolom
+            className="w-full h-40 object-cover bg-gray-100"
           />
+
           {/* Badge kategori */}
-          <Badge className="absolute top-2 left-2 bg-primary text-white text-xs">
-            {book.category}
-          </Badge>
+          {book.category && (
+            <Badge className="absolute top-2 left-2 bg-blue-600 text-white text-xs">
+              {book.category}
+            </Badge>
+          )}
+
           {/* Badge status */}
           <Badge
             className={`absolute top-2 right-2 text-xs ${
@@ -36,7 +40,9 @@ export function BookCard({ book }: Props) {
         {/* Konten */}
         <CardContent className="p-3 space-y-1">
           <h3 className="text-sm font-semibold line-clamp-1">{book.title}</h3>
-          <p className="text-xs text-gray-600 line-clamp-1">{book.author}</p>
+          <p className="text-xs text-gray-600 line-clamp-1">
+            {book.author || "Unknown Author"}
+          </p>
         </CardContent>
       </Card>
     </Link>
